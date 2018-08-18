@@ -20,14 +20,14 @@ public class MainActivity extends AppCompatActivity {
 
         insertData();
 
-//        RecyclerView recyclerView = findViewById(R.id.reminder_recyclerView);
-//        recyclerView.setAdapter(customAdapter = new CustomAdapter(this));
-//        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
-//        recyclerView.setLayoutManager(mLayoutManager);
-//        recyclerView.setItemAnimator(new DefaultItemAnimator());
-//        recyclerView.setHasFixedSize(true);
-//
-//        insertData();
+        RecyclerView recyclerView = findViewById(R.id.reminder_recyclerView);
+        recyclerView.setAdapter(customAdapter = new CustomAdapter(this));
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
+        recyclerView.setLayoutManager(mLayoutManager);
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+        recyclerView.setHasFixedSize(true);
+
+        insertData();
     }
 
     private void insertData(){
@@ -37,9 +37,6 @@ public class MainActivity extends AppCompatActivity {
         contentValues.put(ReminderContract.ReminderTable.COLUMN_MESSAGE , "HELLO");
         long id = database.insert(ReminderContract.ReminderTable.TABLE_NAME , null , contentValues);
         Log.v("Custom ID" , Long.toString(id));
-
-        Cursor cursor = database.query(ReminderContract.ReminderTable.TABLE_NAME , null , null , null,
-                null , null , null );
-        Log.v("Count" , Integer.toString(cursor.getCount()));
+        database.close();
     }
 }
