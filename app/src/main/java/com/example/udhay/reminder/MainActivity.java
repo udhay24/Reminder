@@ -50,12 +50,16 @@ public class MainActivity extends AppCompatActivity {
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int i) {
 
                 int position = viewHolder.getAdapterPosition();
+                Log.v("position" , position+"");
                 cursor.moveToPosition(position);
-                long id = cursor.getLong(cursor.getColumnIndex(ReminderContract.ReminderTable._ID)) -1;
+
+                long id = cursor.getLong(cursor.getColumnIndex(ReminderContract.ReminderTable._ID)) ;
+                Log.v("cursor position" , cursor.getPosition()+" cursor count" + cursor.getCount() + "id :"+id);
 
               new ReminderOpenHelper(MainActivity.this).getWritableDatabase().delete(ReminderContract.ReminderTable.TABLE_NAME ,
-                      ReminderContract.ReminderTable._ID +" = ? " , new String[]{Long.toString(id)} );
-              customAdapter.notifyDataSetChanged();
+                        ReminderContract.ReminderTable._ID +" = ? " , new String[]{Long.toString(id)} );
+                customAdapter.notifyDataSetChanged();
+                customAdapter.refreshCursor();;
 
 
             }
