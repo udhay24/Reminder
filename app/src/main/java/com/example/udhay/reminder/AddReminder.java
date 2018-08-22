@@ -33,5 +33,7 @@ public class AddReminder extends AppCompatActivity {
         contentValues.put(ReminderContract.ReminderTable.COLUMN_MESSAGE , reminder.getMessage());
 
         new ReminderOpenHelper(this).getWritableDatabase().insert(ReminderContract.ReminderTable.TABLE_NAME , null ,contentValues);
+        MainActivity.customAdapter.refreshCursor();
+        MainActivity.customAdapter.notifyDataSetChanged();
     }
 }

@@ -2,6 +2,7 @@ package com.example.udhay.reminder;
 
 import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -16,22 +17,24 @@ import android.view.View;
 
 public class MainActivity extends AppCompatActivity {
 
-    CustomAdapter customAdapter;
+    public static CustomAdapter customAdapter;
+    public Cursor cursor;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        customAdapter = new CustomAdapter(this);
+        cursor = customAdapter.getCursor();
         prepareRecyclerView();
         prepareFab();
-
 
 
     }
 
     private void prepareRecyclerView(){
         RecyclerView recyclerView = findViewById(R.id.reminder_recyclerView);
-        recyclerView.setAdapter(customAdapter = new CustomAdapter(this));
+        recyclerView.setAdapter(customAdapter);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -45,9 +48,16 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int i) {
-                new ReminderOpenHelper(MainActivity.this).getWritableDatabase().delete(ReminderContract.ReminderTable.TABLE_NAME ,
-                        ReminderContract.ReminderTable._ID + " =? " , new String[]{Long.toString(i)});
-                customAdapter.notifyDataSetChanged();
+
+                int position = viewHolder.getAdapterPosition();
+                cursor.moveToPosition(position);
+                long id = cursor.getLong(cursor.getColumnIndex(ReminderContract.ReminderTable._ID)) -1;
+
+              new ReminderOpenHelper(MainActivity.this).getWritableDatabase().delete(ReminderContract.ReminderTable.TABLE_NAME ,
+                      ReminderContract.ReminderTable._ID +" = ? " , new String[]{Long.toString(id)} );
+              customAdapter.notifyDataSetChanged();
+
+
             }
         });
         itemTouchHelper.attachToRecyclerView(recyclerView);
