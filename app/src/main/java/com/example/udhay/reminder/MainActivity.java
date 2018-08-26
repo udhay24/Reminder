@@ -14,6 +14,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -25,10 +26,18 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         customAdapter = new CustomAdapter(this);
-        cursor = customAdapter.getCursor();
+        refreshCursor();
         prepareRecyclerView();
         prepareFab();
 
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refreshCursor();
+        Toast.makeText(this, "cursor count"+cursor.getCount() , Toast.LENGTH_LONG).show();
 
     }
 
@@ -58,8 +67,10 @@ public class MainActivity extends AppCompatActivity {
 
               new ReminderOpenHelper(MainActivity.this).getWritableDatabase().delete(ReminderContract.ReminderTable.TABLE_NAME ,
                         ReminderContract.ReminderTable._ID +" = ? " , new String[]{Long.toString(id)} );
-                customAdapter.notifyDataSetChanged();
-                customAdapter.refreshCursor();;
+              customAdapter.refreshCursor();
+              customAdapter.notifyDataSetChanged();
+              refreshCursor();
+
 
 
             }
@@ -90,5 +101,9 @@ public class MainActivity extends AppCompatActivity {
         long id = database.insert(ReminderContract.ReminderTable.TABLE_NAME , null , contentValues);
         Log.v("Custom ID" , Long.toString(id));
         database.close();
+    }
+
+    private void refreshCursor(){
+        cursor = customAdapter.getCursor();
     }
 }

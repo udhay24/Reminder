@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">Reminder</string>
+    <string-array name="reminder">
+
+        <item>Medium</item>
+        <item>Low</item>
+        <item>High</item>
+    </string-array>
 </resources>
