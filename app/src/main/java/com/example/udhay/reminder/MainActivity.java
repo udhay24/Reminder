@@ -25,7 +25,29 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        customAdapter = new CustomAdapter(this);
+        customAdapter = new CustomAdapter(this, new RecyclerViewClickInterface() {
+            @Override
+            public void onItemClick(int position, View view) {
+                cursor.moveToPosition(position);
+                long id = cursor.getLong(cursor.getColumnIndex(ReminderContract.ReminderTable._ID));
+//                Cursor cursor = new ReminderOpenHelper(MainActivity.this).getReadableDatabase().query(ReminderContract.ReminderTable.TABLE_NAME ,
+//                        null , ReminderContract.ReminderTable._ID+" =? " ,
+//                        new String[]{Long.toString(id)} , null , null , null);
+//                cursor.moveToFirst();
+                String message = cursor.getString(cursor.getColumnIndex(ReminderContract.ReminderTable.COLUMN_MESSAGE));
+                int importance = cursor.getInt(cursor.getColumnIndex(ReminderContract.ReminderTable.COLUMN_IMPORTANCE));
+
+                Intent intent = new Intent(MainActivity.this , AddReminder.class);
+                Bundle bundle = new Bundle();
+                bundle.putInt(ReminderContract.ReminderTable.COLUMN_IMPORTANCE , importance);
+                bundle.putCharSequence(ReminderContract.ReminderTable.COLUMN_MESSAGE , message);
+                bundle.putLong("id" , id);
+                intent.putExtras(bundle);
+                startActivity(intent)   ;
+            }
+        });
+
+
         refreshCursor();
         prepareRecyclerView();
         prepareFab();
@@ -37,8 +59,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         refreshCursor();
-        Toast.makeText(this, "cursor count"+cursor.getCount() , Toast.LENGTH_LONG).show();
-
     }
 
     private void prepareRecyclerView(){
@@ -59,21 +79,16 @@ public class MainActivity extends AppCompatActivity {
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int i) {
 
                 int position = viewHolder.getAdapterPosition();
-                Log.v("position" , position+"");
                 cursor.moveToPosition(position);
 
                 long id = cursor.getLong(cursor.getColumnIndex(ReminderContract.ReminderTable._ID)) ;
-                Log.v("cursor position" , cursor.getPosition()+" cursor count" + cursor.getCount() + "id :"+id);
 
               new ReminderOpenHelper(MainActivity.this).getWritableDatabase().delete(ReminderContract.ReminderTable.TABLE_NAME ,
                         ReminderContract.ReminderTable._ID +" = ? " , new String[]{Long.toString(id)} );
               customAdapter.refreshCursor();
               customAdapter.notifyDataSetChanged();
               refreshCursor();
-
-
-
-            }
+              }
         });
         itemTouchHelper.attachToRecyclerView(recyclerView);
     }
@@ -90,18 +105,6 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-
-
-
-    private void insertDummyData(){
-        SQLiteDatabase database = new ReminderOpenHelper(this).getWritableDatabase();
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(ReminderContract.ReminderTable.COLUMN_IMPORTANCE , 1250);
-        contentValues.put(ReminderContract.ReminderTable.COLUMN_MESSAGE , "HELLO");
-        long id = database.insert(ReminderContract.ReminderTable.TABLE_NAME , null , contentValues);
-        Log.v("Custom ID" , Long.toString(id));
-        database.close();
-    }
 
     private void refreshCursor(){
         cursor = customAdapter.getCursor();

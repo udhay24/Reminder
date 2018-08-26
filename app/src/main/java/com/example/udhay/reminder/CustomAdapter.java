@@ -3,7 +3,10 @@ package com.example.udhay.reminder;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -18,6 +21,7 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
 
     private Context mContext ;
     private Cursor cursor;
+    private RecyclerViewClickInterface clickInterface;
 
     public Cursor getCursor() {
         return cursor;
@@ -25,9 +29,10 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
 
 
 
-    public CustomAdapter(Context context){
+    public CustomAdapter(Context context , RecyclerViewClickInterface clickInterface){
         mContext = context;
         refreshCursor();
+        this.clickInterface = clickInterface;
     }
 
     @NonNull
@@ -35,26 +40,42 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
 
         View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.single_iemview , viewGroup , false);
-
-        return new ViewHolder(view);
+        final ViewHolder viewHolder = new ViewHolder(view);
+        view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                clickInterface.onItemClick(viewHolder.getAdapterPosition(),view);
+            }
+        });
+        return viewHolder;
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
-
+        GradientDrawable gradientDrawable;
         cursor.moveToPosition(i);
         viewHolder.getMessageTextView().setText(cursor.getString(cursor.getColumnIndex(ReminderTable.COLUMN_MESSAGE)));
         int importance = cursor.getInt(cursor.getColumnIndex(ReminderTable.COLUMN_IMPORTANCE));
+
         switch(importance){
             case Reminder.IMPORTANCE_LOW:
-                viewHolder.getImageView().setImageResource(android.R.color.black);
+                gradientDrawable = (GradientDrawable)mContext.getDrawable(R.drawable.circle);
+                gradientDrawable.setColor(mContext.getResources().getColor(android.R.color.holo_blue_light));
+                viewHolder.getImageView().setImageDrawable(gradientDrawable);
                 break;
+
             case Reminder.IMPORTANCE_INTERMEDIATE:
-                viewHolder.getImageView().setImageResource(android.R.color.holo_blue_bright);
+                gradientDrawable = (GradientDrawable)mContext.getDrawable(R.drawable.circle);
+                gradientDrawable.setColor(mContext.getResources().getColor(android.R.color.holo_green_light));
+                viewHolder.getImageView().setImageDrawable(gradientDrawable);
                 break;
+
             case Reminder.IMPORTANCE_HIGH:
-                viewHolder.getImageView().setImageResource(android.R.color.holo_green_light);
+                gradientDrawable = (GradientDrawable)mContext.getDrawable(R.drawable.circle);
+                gradientDrawable.setColor(mContext.getResources().getColor(android.R.color.holo_red_light));
+                viewHolder.getImageView().setImageDrawable(gradientDrawable);
                 break;
+
              default:
                 viewHolder.getImageView().setImageResource(android.R.color.holo_blue_bright);
         }
@@ -92,4 +113,8 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
         cursor =  new ReminderOpenHelper(mContext).getReadableDatabase().query(ReminderContract.ReminderTable.TABLE_NAME , null , null, null ,null , null , null );
 
     }
+
+}
+interface RecyclerViewClickInterface{
+    void onItemClick(int position , View view);
 }

@@ -21,23 +21,41 @@ public class AddReminder extends AppCompatActivity {
     EditText editText;
     Spinner spinner;
     int importance;
+    String message;
+    long id;
+
+    boolean newEntryFlag = true;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_reminder);
 
         editText = findViewById(R.id.messageEditText);
-
+        spinner = findViewById(R.id.spinner);
         FloatingActionButton actionButton = findViewById(R.id.floating_action_button);
+        setUpSpinner();
+
+        Bundle bundle = getIntent().getExtras();
+        if(bundle !=null) {
+            newEntryFlag = false;
+            message = (String) bundle.getCharSequence(ReminderContract.ReminderTable.COLUMN_MESSAGE);
+            importance = bundle.getInt(ReminderContract.ReminderTable.COLUMN_IMPORTANCE);
+            id = bundle.getLong("id");
+            updateDisplay();
+        }
+
         actionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                saveEntry();
+                if(newEntryFlag){
+                saveEntry();}
+                else{
+                    updateEntry(id , importance , message);
+                }
             }
         });
 
-        spinner = findViewById(R.id.spinner);
-        setUpSpinner();
+
 
     }
 
@@ -59,6 +77,7 @@ public class AddReminder extends AppCompatActivity {
         MainActivity.customAdapter.notifyDataSetChanged();
         startActivity(new Intent(this , MainActivity.class));
     }
+
     private void setUpSpinner(){
 
         ArrayAdapter<CharSequence> arrayAdapter = ArrayAdapter.createFromResource(this , R.array.reminder , android.R.layout.simple_spinner_item);
@@ -82,7 +101,7 @@ public class AddReminder extends AppCompatActivity {
                     default:
                         importance = Reminder.IMPORTANCE_INTERMEDIATE;
                 }
-                Toast.makeText(AddReminder.this , ""+importance , Toast.LENGTH_LONG).show();
+
             }
 
             @Override
@@ -90,6 +109,36 @@ public class AddReminder extends AppCompatActivity {
 
             }
         });
+
+    }
+    private void updateEntry(long id , int importance , String message){
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(ReminderContract.ReminderTable.COLUMN_IMPORTANCE , importance);
+        contentValues.put(ReminderContract.ReminderTable.COLUMN_MESSAGE , message);
+
+        int i = new ReminderOpenHelper(this).getWritableDatabase().update(ReminderContract.ReminderTable.TABLE_NAME  , contentValues ,
+                ReminderContract.ReminderTable._ID+ " = ? " , new String[]{Long.toString(id)});
+        Log.v("rows affected" , ""+i);
+        MainActivity.customAdapter.refreshCursor();
+        MainActivity.customAdapter.notifyDataSetChanged();
+        startActivity(new Intent(this , MainActivity.class));
+    }
+
+    private void updateDisplay(){
+        editText.setText(message);
+        int i = 0;
+        switch(importance){
+            case Reminder.IMPORTANCE_LOW:
+                i = 1;
+                break;
+            case Reminder.IMPORTANCE_HIGH:
+                i = 2;
+                break;
+            case Reminder.IMPORTANCE_INTERMEDIATE:
+                i=0;
+                break;
+        }
+        spinner.setSelection(i);
 
     }
 }
