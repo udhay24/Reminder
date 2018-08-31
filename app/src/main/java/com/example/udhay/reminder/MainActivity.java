@@ -1,20 +1,24 @@
 package com.example.udhay.reminder;
 
-import android.content.ContentValues;
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.util.Log;
+import android.view.Gravity;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -30,10 +34,6 @@ public class MainActivity extends AppCompatActivity {
             public void onItemClick(int position, View view) {
                 cursor.moveToPosition(position);
                 long id = cursor.getLong(cursor.getColumnIndex(ReminderContract.ReminderTable._ID));
-//                Cursor cursor = new ReminderOpenHelper(MainActivity.this).getReadableDatabase().query(ReminderContract.ReminderTable.TABLE_NAME ,
-//                        null , ReminderContract.ReminderTable._ID+" =? " ,
-//                        new String[]{Long.toString(id)} , null , null , null);
-//                cursor.moveToFirst();
                 String message = cursor.getString(cursor.getColumnIndex(ReminderContract.ReminderTable.COLUMN_MESSAGE));
                 int importance = cursor.getInt(cursor.getColumnIndex(ReminderContract.ReminderTable.COLUMN_IMPORTANCE));
 
@@ -52,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
         prepareRecyclerView();
         prepareFab();
 
+        NotificationManagerCompat.from(this).notify(24 , prepareNotification());
 
     }
 
@@ -59,6 +60,31 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         refreshCursor();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        getMenuInflater().inflate(R.menu.main_acitivity_menu , menu);
+        return true;
+
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch(item.getItemId()){
+            case R.id.menu_sort_icon:
+                showDialogBox();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+
+    }
+
+    private void showDialogBox(){
+        new CustomDialog().show(getSupportFragmentManager() , "dialog");
     }
 
     private void prepareRecyclerView(){
@@ -95,7 +121,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void prepareFab(){
         FloatingActionButton actionButton = findViewById(R.id.floating_action_button);
-        actionButton.setRippleColor(getResources().getColor(R.color.colorPrimary));
         actionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -107,6 +132,26 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void refreshCursor(){
+        customAdapter.refreshCursor();
         cursor = customAdapter.getCursor();
+    }
+
+    private Notification prepareNotification(){
+
+        Intent intent = new Intent(this , MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this , 0 , intent , 0);
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this , getResources().getString(R.string.Notification_channel_id));
+        cursor.moveToFirst();
+        builder.setSmallIcon(R.drawable.ic_launcher_foreground)
+                .setContentTitle("Reminder Pending")
+                .setContentText(cursor.getString(cursor.getColumnIndex(ReminderContract.ReminderTable.COLUMN_MESSAGE)))
+        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+        .setContentIntent(pendingIntent);
+
+       return builder.build();
+
+
     }
 }

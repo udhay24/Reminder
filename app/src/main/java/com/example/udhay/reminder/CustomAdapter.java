@@ -1,6 +1,7 @@
 package com.example.udhay.reminder;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.Drawable;
@@ -110,8 +111,13 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
     }
 
     public void refreshCursor(){
-        cursor =  new ReminderOpenHelper(mContext).getReadableDatabase().query(ReminderContract.ReminderTable.TABLE_NAME , null , null, null ,null , null , null );
-
+        SharedPreferences preferences = mContext.getSharedPreferences(mContext.getString(R.string.shared_preference_file) , Context.MODE_PRIVATE);
+        String sortBy = preferences.getString(mContext.getString(R.string.sort_by) , Reminder.SORT_BY_TIME);
+        if(sortBy.equals(Reminder.SORT_BY_TIME)) {
+            cursor = new ReminderOpenHelper(mContext).getReadableDatabase().query(ReminderContract.ReminderTable.TABLE_NAME, null, null, null, null, null, null);
+        }else if(sortBy.equals(Reminder.SORT_BY_IMPORTANCE)) {
+            cursor = new ReminderOpenHelper(mContext).getReadableDatabase().query(ReminderContract.ReminderTable.TABLE_NAME, null, null, null, null, null, ReminderTable.COLUMN_IMPORTANCE+" DESC ");
+        }
     }
 
 }

@@ -6,4 +6,33 @@
         <item>Low</item>
         <item>High</item>
     </string-array>
+
+    <!--name of the shared preference file-->
+    <string name="shared_preference_file">preference file</string>
+
+
+    <string name="sort_by">sort by</string>
+
+
+    <!--Menu item-->
+    <string name="menu_item_sort">Sort By</string>
+
+    <!--Pop up Sort menu-->
+    <string name="sort_by_time">Sort By Time</string>
+    <string name="sort_by_importance">Sort By Importance</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <!--array list for dialog option-->
+    <string-array name="sort_by_array">
+        <item>@string/sort_by_time</item>
+        <item>@string/sort_by_importance</item>
+    </string-array>
+
+
+    <!--Notification Channel_id-->
+    <string name="Notification_channel_id">default_channel</string>
+
+
 </resources>
