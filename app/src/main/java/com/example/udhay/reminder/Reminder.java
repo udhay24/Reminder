@@ -1,5 +1,11 @@
 package com.example.udhay.reminder;
 
+import android.app.Notification;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
+import android.support.v4.app.NotificationCompat;
+
 public class Reminder {
 
     public static final int IMPORTANCE_LOW = 0;
@@ -28,4 +34,25 @@ public class Reminder {
     }
 
 
+}
+class ReminderUtil{
+
+    public static Notification prepareNotification(Context context){
+
+        Intent intent = new Intent(context , MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context , 0 , intent , 0);
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context , context.getResources().getString(R.string.Notification_channel_id));
+        MainActivity.customAdapter.getCursor().moveToFirst();
+        builder.setSmallIcon(R.drawable.ic_launcher_foreground)
+                .setContentTitle("Reminder Pending")
+                .setContentText(MainActivity.customAdapter.getCursor().getString(MainActivity.customAdapter.getCursor().getColumnIndex(ReminderContract.ReminderTable.COLUMN_MESSAGE)))
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setContentIntent(pendingIntent);
+
+        return builder.build();
+
+
+    }
 }

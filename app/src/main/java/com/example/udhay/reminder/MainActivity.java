@@ -2,6 +2,9 @@ package com.example.udhay.reminder;
 
 import android.app.Notification;
 import android.app.PendingIntent;
+import android.app.job.JobInfo;
+import android.app.job.JobScheduler;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.database.Cursor;
 import android.support.annotation.NonNull;
@@ -51,9 +54,12 @@ public class MainActivity extends AppCompatActivity {
         refreshCursor();
         prepareRecyclerView();
         prepareFab();
+        }
 
-        NotificationManagerCompat.from(this).notify(24 , prepareNotification());
-
+    @Override
+    protected void onStart() {
+        super.onStart();
+        notificationJobScheduler();
     }
 
     @Override
@@ -136,22 +142,14 @@ public class MainActivity extends AppCompatActivity {
         cursor = customAdapter.getCursor();
     }
 
-    private Notification prepareNotification(){
+    private void notificationJobScheduler(){
 
-        Intent intent = new Intent(this , MainActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this , 0 , intent , 0);
+        long MILLI_SECOND = 1*60*60*1000;
+        JobInfo.Builder builder = new JobInfo.Builder(24 , new ComponentName(this , ReminderJob.class));
+        builder.setPeriodic(MILLI_SECOND);
 
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this , getResources().getString(R.string.Notification_channel_id));
-        cursor.moveToFirst();
-        builder.setSmallIcon(R.drawable.ic_launcher_foreground)
-                .setContentTitle("Reminder Pending")
-                .setContentText(cursor.getString(cursor.getColumnIndex(ReminderContract.ReminderTable.COLUMN_MESSAGE)))
-        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-        .setContentIntent(pendingIntent);
-
-       return builder.build();
-
-
+        JobScheduler scheduler = (JobScheduler)getSystemService(JOB_SCHEDULER_SERVICE);
+        scheduler.schedule(builder.build());
     }
+
 }
