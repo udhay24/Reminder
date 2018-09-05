@@ -1,32 +1,36 @@
 package com.example.udhay.reminder;
 
-import android.app.Notification;
+
+import android.annotation.TargetApi;
+import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
+import android.app.job.JobService;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.database.Cursor;
+import android.icu.util.Calendar;
+import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+
+
 
 public class MainActivity extends AppCompatActivity {
 
     public static CustomAdapter customAdapter;
     public Cursor cursor;
+    public static final String ACTION_NOTIFY = "com.example.udhay.reminder.ACTION_NOTIFY";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,12 +61,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-        notificationJobScheduler();
-    }
-
-    @Override
     protected void onResume() {
         super.onResume();
         refreshCursor();
@@ -74,6 +72,12 @@ public class MainActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.main_acitivity_menu , menu);
         return true;
 
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        notificationAlarmScheduler();
     }
 
     @Override
@@ -132,8 +136,11 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Intent intent = new Intent(MainActivity.this , AddReminder.class);
                 startActivity(intent);
+
+
             }
         });
+
     }
 
 
@@ -142,14 +149,14 @@ public class MainActivity extends AppCompatActivity {
         cursor = customAdapter.getCursor();
     }
 
-    private void notificationJobScheduler(){
+    private void notificationAlarmScheduler(){
 
-        long MILLI_SECOND = 1*60*60*1000;
-        JobInfo.Builder builder = new JobInfo.Builder(24 , new ComponentName(this , ReminderJob.class));
-        builder.setPeriodic(MILLI_SECOND);
+        AlarmManager alarmManager = ((AlarmManager) getSystemService(ALARM_SERVICE));
+        Intent intent = new Intent(ACTION_NOTIFY);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this  , 10 ,intent , PendingIntent.FLAG_UPDATE_CURRENT);
 
-        JobScheduler scheduler = (JobScheduler)getSystemService(JOB_SCHEDULER_SERVICE);
-        scheduler.schedule(builder.build());
+        alarmManager.setRepeating(AlarmManager.RTC, SystemClock.elapsedRealtime()+5000,
+                5000, pendingIntent);
     }
 
 }
