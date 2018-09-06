@@ -20,7 +20,12 @@
         </activity>
         <activity
             android:name=".AddReminder"
-            android:launchMode="singleTask" />
+            android:launchMode="singleTask"
+            android:parentActivityName=".MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.udhay.reminder.MainActivity" />
+        </activity>
 
         <receiver
             android:name=".MyReceiver"

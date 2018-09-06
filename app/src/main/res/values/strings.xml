@@ -34,5 +34,7 @@
     <!--Notification Channel_id-->
     <string name="Notification_channel_id">default_channel</string>
 
-
+<!--Toolbar title-->
+    <string name="toolbar_add_reminder">Add Reminder</string>
+    <string name="toolbar_edit_Reminder">Edit Reminder</string>
 </resources>

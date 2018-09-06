@@ -3,9 +3,12 @@ package com.example.udhay.reminder;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -30,6 +33,11 @@ public class AddReminder extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_reminder);
 
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setHomeButtonEnabled(true);
+
+        getSupportActionBar().setTitle(R.string.toolbar_add_reminder);
         editText = findViewById(R.id.messageEditText);
         spinner = findViewById(R.id.spinner);
         FloatingActionButton actionButton = findViewById(R.id.floating_action_button);
@@ -37,6 +45,7 @@ public class AddReminder extends AppCompatActivity {
 
         Bundle bundle = getIntent().getExtras();
         if(bundle !=null) {
+            getSupportActionBar().setTitle(R.string.toolbar_edit_Reminder);
             newEntryFlag = false;
             message = (String) bundle.getCharSequence(ReminderContract.ReminderTable.COLUMN_MESSAGE);
             importance = bundle.getInt(ReminderContract.ReminderTable.COLUMN_IMPORTANCE);
@@ -118,7 +127,6 @@ public class AddReminder extends AppCompatActivity {
 
         int i = new ReminderOpenHelper(this).getWritableDatabase().update(ReminderContract.ReminderTable.TABLE_NAME  , contentValues ,
                 ReminderContract.ReminderTable._ID+ " = ? " , new String[]{Long.toString(id)});
-        Log.v("rows affected" , ""+i);
         MainActivity.customAdapter.refreshCursor();
         MainActivity.customAdapter.notifyDataSetChanged();
         startActivity(new Intent(this , MainActivity.class));
@@ -141,4 +149,16 @@ public class AddReminder extends AppCompatActivity {
         spinner.setSelection(i);
 
     }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId()){
+            case android.R.id.home:
+                NavUtils.navigateUpFromSameTask(this);
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+
 }
