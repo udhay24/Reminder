@@ -10,7 +10,6 @@ import android.app.job.JobService;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.database.Cursor;
-import android.icu.util.Calendar;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -24,6 +23,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import java.util.Calendar;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -155,8 +155,14 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(ACTION_NOTIFY);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this  , 10 ,intent , PendingIntent.FLAG_UPDATE_CURRENT);
 
-        alarmManager.setRepeating(AlarmManager.RTC, SystemClock.elapsedRealtime()+5000,
-                5000, pendingIntent);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        calendar.set(Calendar.HOUR_OF_DAY, 8);
+        calendar.set(Calendar.MINUTE, 30);
+
+
+        alarmManager.setRepeating(AlarmManager.RTC, calendar.getTimeInMillis(),
+                1000*60*60*6, pendingIntent);
     }
 
 }
